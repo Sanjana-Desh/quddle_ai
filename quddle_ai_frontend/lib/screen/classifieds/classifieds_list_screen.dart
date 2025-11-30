@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/classifieds_service.dart';
-import '../../utils/constants/colors.dart';
 import 'post_classified_screen.dart';
 import 'classified_detail_screen.dart';
+import '../../utils/constants/classifieds_color.dart';
 
 class ClassifiedsListScreen extends StatefulWidget {
   const ClassifiedsListScreen({super.key});
@@ -13,20 +13,38 @@ class ClassifiedsListScreen extends StatefulWidget {
 
 class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
   List<dynamic> _classifieds = [];
+  List<dynamic> _filteredClassifieds = [];
   bool _isLoading = true;
   String? _selectedCategory;
+  final TextEditingController _searchController = TextEditingController();
 
   final List<Map<String, dynamic>> _categories = [
-    {'label': 'All', 'value': null, 'icon': Icons.grid_view},
-    {'label': 'Furniture', 'value': 'Furniture', 'icon': Icons.weekend},
-    {'label': 'Home Appliances', 'value': 'Home Appliances', 'icon': Icons.kitchen},
-    {'label': 'Mobile Phones', 'value': 'Mobile Phones', 'icon': Icons.phone_android},
+    {'label': 'All', 'value': null, 'icon': Icons.grid_view, 'color': ClassifiedsColors.primary},
+    {'label': 'Electronics', 'value': 'Electronics', 'icon': Icons.devices, 'color': ClassifiedsColors.categoryElectronics},
+    {'label': 'Fashion', 'value': 'Fashion', 'icon': Icons.checkroom, 'color': ClassifiedsColors.categoryFashion},
+    {'label': 'Home & Furniture', 'value': 'Home & Furniture', 'icon': Icons.chair, 'color': ClassifiedsColors.categoryHome},
+    {'label': 'Beauty & Personal Care', 'value': 'Beauty & Personal Care', 'icon': Icons.spa, 'color': ClassifiedsColors.categoryBeauty},
+    {'label': 'Vehicles', 'value': 'Vehicles', 'icon': Icons.directions_car, 'color': ClassifiedsColors.categoryVehicles},
+    {'label': 'Real Estate', 'value': 'Real Estate', 'icon': Icons.home, 'color': ClassifiedsColors.categoryRealEstate},
+    {'label': 'Jobs', 'value': 'Jobs', 'icon': Icons.work, 'color': ClassifiedsColors.categoryJobs},
+    {'label': 'Services', 'value': 'Services', 'icon': Icons.build, 'color': ClassifiedsColors.categoryServices},
+    {'label': 'Pets & Animals', 'value': 'Pets & Animals', 'icon': Icons.pets, 'color': ClassifiedsColors.categoryPets},
+    {'label': 'Sports & Outdoors', 'value': 'Sports & Outdoors', 'icon': Icons.sports, 'color': ClassifiedsColors.categorySports},
+    {'label': 'Books & Education', 'value': 'Books & Education', 'icon': Icons.menu_book, 'color': ClassifiedsColors.accentBlue},
+    {'label': 'Food & Grocery', 'value': 'Food & Grocery', 'icon': Icons.restaurant, 'color': ClassifiedsColors.accentOrange},
   ];
 
   @override
   void initState() {
     super.initState();
     _loadClassifieds();
+    _searchController.addListener(_filterClassifieds);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadClassifieds() async {
@@ -39,6 +57,7 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
     if (result['success'] && mounted) {
       setState(() {
         _classifieds = result['classifieds'] ?? [];
+        _filterClassifieds();
         _isLoading = false;
       });
     } else {
@@ -46,16 +65,45 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
     }
   }
 
+  void _filterClassifieds() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredClassifieds = _classifieds;
+      } else {
+        _filteredClassifieds = _classifieds.where((classified) {
+          final title = (classified['title'] ?? '').toString().toLowerCase();
+          final description = (classified['description'] ?? '').toString().toLowerCase();
+          final location = (classified['location'] ?? '').toString().toLowerCase();
+          final category = (classified['category'] ?? '').toString().toLowerCase();
+          
+          return title.contains(query) || 
+                 description.contains(query) || 
+                 location.contains(query) ||
+                 category.contains(query);
+        }).toList();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ClassifiedsColors.background,
       appBar: AppBar(
-        title: const Text('Classifieds', style: TextStyle(color: Colors.black)),
-        backgroundColor: MyColors.navbar,
-        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(
+          'Classifieds',
+          style: TextStyle(
+            color: ClassifiedsColors.textPrimary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: ClassifiedsColors.cardBackground,
+        elevation: 0,
+        iconTheme: IconThemeData(color: ClassifiedsColors.textPrimary),
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_balance_wallet, color: Colors.black),
+            icon: Icon(Icons.account_balance_wallet, color: ClassifiedsColors.textPrimary),
             onPressed: () {
               Navigator.pushNamed(context, '/wallet');
             },
@@ -64,60 +112,92 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
       ),
       body: Column(
         children: [
-          // Category filter
+          // Search Bar
           Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            color: ClassifiedsColors.cardBackground,
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              style: TextStyle(color: ClassifiedsColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Search classifieds...',
+                hintStyle: TextStyle(color: ClassifiedsColors.textTertiary),
+                prefixIcon: Icon(Icons.search, color: ClassifiedsColors.textSecondary),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: ClassifiedsColors.textSecondary),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: ClassifiedsColors.surfaceLight,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: ClassifiedsColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: ClassifiedsColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: ClassifiedsColors.primary, width: 2),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+
+          // Category filter chips
+          Container(
+            height: 50,
+            color: ClassifiedsColors.cardBackground,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 final isSelected = _selectedCategory == category['value'];
+                final color = category['color'] as Color? ?? ClassifiedsColors.primary;
                 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InkWell(
                     onTap: () {
                       setState(() {
                         _selectedCategory = category['value'];
                       });
                       _loadClassifieds();
                     },
+                    borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? MyColors.primary : Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        color: isSelected ? color.withValues(alpha: 0.2) : ClassifiedsColors.surfaceLight,
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isSelected ? MyColors.primary : Colors.grey[300]!,
-                          width: 1,
+                          color: isSelected ? color : ClassifiedsColors.border,
+                          width: isSelected ? 2 : 1,
                         ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: MyColors.primary.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                )
-                              ]
-                            : [],
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             category['icon'] as IconData,
-                            color: isSelected ? Colors.white : Colors.black,
-                            size: 24,
+                            color: isSelected ? color : ClassifiedsColors.textSecondary,
+                            size: 18,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(width: 8),
                           Text(
                             category['label'] as String,
                             style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black,
-                              fontSize: 12,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected ? color : ClassifiedsColors.textPrimary,
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                             ),
                           ),
                         ],
@@ -131,37 +211,67 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
 
           const Divider(height: 1),
 
-         // Classifieds list
+          // Results count
+          if (!_isLoading && _filteredClassifieds.isNotEmpty)
+            Container(
+              width: double.infinity,
+              color: ClassifiedsColors.cardBackground,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                '${_filteredClassifieds.length} ${_filteredClassifieds.length == 1 ? 'ad' : 'ads'} found',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: ClassifiedsColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+
+          // Classifieds list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: MyColors.primary))
-                : _classifieds.isEmpty
+                ? Center(child: CircularProgressIndicator(color: ClassifiedsColors.primary))
+                : _filteredClassifieds.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey[400]),
+                            Icon(
+                              _searchController.text.isNotEmpty 
+                                  ? Icons.search_off 
+                                  : Icons.inventory_2_outlined,
+                              size: 80,
+                              color: ClassifiedsColors.textTertiary,
+                            ),
                             const SizedBox(height: 16),
                             Text(
-                              'No classifieds found',
-                              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                              _searchController.text.isNotEmpty
+                                  ? 'No results found'
+                                  : 'No classifieds found',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: ClassifiedsColors.textSecondary,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Be the first to post an ad!',
-                              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                              _searchController.text.isNotEmpty
+                                  ? 'Try adjusting your search'
+                                  : 'Be the first to post an ad!',
+                              style: TextStyle(fontSize: 14, color: ClassifiedsColors.textTertiary),
                             ),
                           ],
                         ),
                       )
                     : RefreshIndicator(
                         onRefresh: _loadClassifieds,
-                        color: MyColors.primary,
+                        color: ClassifiedsColors.primary,
                         child: ListView.builder(
-                          padding: const EdgeInsets.all(8),
-                          itemCount: _classifieds.length,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _filteredClassifieds.length,
                           itemBuilder: (context, index) {
-                            final classified = _classifieds[index];
+                            final classified = _filteredClassifieds[index];
                             return _buildClassifiedCard(classified);
                           },
                         ),
@@ -169,19 +279,39 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const PostClassifiedScreen()),
-          );
-          if (result == true) {
-            _loadClassifieds();
-          }
-        },
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Post Ad', style: TextStyle(color: Colors.white)),
-        backgroundColor: MyColors.primary,
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          gradient: ClassifiedsColors.primaryGradient,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: ClassifiedsColors.primary.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const PostClassifiedScreen()),
+            );
+            if (result == true) {
+              _loadClassifieds();
+            }
+          },
+          icon: Icon(Icons.add, color: ClassifiedsColors.textWhite),
+          label: Text(
+            'Post Ad',
+            style: TextStyle(
+              color: ClassifiedsColors.textWhite,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
       ),
     );
   }
@@ -191,9 +321,10 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
     final imageUrl = images != null && images.isNotEmpty ? images[0] : null;
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: ClassifiedsColors.cardBackground,
+      elevation: 0,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -203,95 +334,115 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                  image: imageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: imageUrl == null
-                    ? const Icon(Icons.image, size: 40, color: Colors.grey)
-                    : null,
-              ),
-
-              const SizedBox(width: 12),
-
-              // Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      classified['title'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: ClassifiedsColors.border,
+              width: 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Image with hero animation
+                Hero(
+                  tag: 'classified_${classified['id'] ?? classified['title']}',
+                  child: Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      color: ClassifiedsColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                      image: imageUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    const SizedBox(height: 4),
-                    if (classified['price'] != null)
+                    child: imageUrl == null
+                        ? Icon(Icons.image, size: 40, color: ClassifiedsColors.textTertiary)
+                        : null,
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        'LooP ${classified['price']}',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: MyColors.primary,
+                        classified['title'] ?? '',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          color: ClassifiedsColors.textPrimary,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    const SizedBox(height: 4),
-                    if (classified['category'] != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: MyColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          classified['category'],
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: MyColors.primary,
-                            fontWeight: FontWeight.w500,
+                      const SizedBox(height: 6),
+                      if (classified['price'] != null)
+                        Text(
+                          '₹${classified['price']}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: ClassifiedsColors.primary,
                           ),
                         ),
-                      ),
-                    const SizedBox(height: 4),
-                    if (classified['location'] != null)
+                      const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              classified['location'],
-                              style: const TextStyle(fontSize: 12, color: Colors.grey),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          if (classified['category'] != null)
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: ClassifiedsColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  classified['category'],
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: ClassifiedsColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
-                  ],
+                      const SizedBox(height: 8),
+                      if (classified['location'] != null)
+                        Row(
+                          children: [
+                            Icon(Icons.location_on, size: 14, color: ClassifiedsColors.textSecondary),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                classified['location'],
+                                style: TextStyle(fontSize: 12, color: ClassifiedsColors.textSecondary),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

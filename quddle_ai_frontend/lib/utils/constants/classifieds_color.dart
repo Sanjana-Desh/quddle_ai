@@ -56,7 +56,9 @@ class ClassifiedsColors {
   
   // Currency/Loop Color - Special highlight
   static Color loopCurrency =
-      const Color(0xFFFFD700).withValues(alpha: 0.9); // Muted gold
+      const Color.fromARGB(255, 255, 149,0).withValues(alpha: 0.9); // Muted gold
+  static Color loopIcon =
+      const Color.fromARGB(255, 208, 119,31).withValues(alpha: 0.9);
 
   static const Color loopBackground = Color(0xFFFFF9E6); // Light gold tint
   

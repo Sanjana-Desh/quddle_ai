@@ -1,8 +1,8 @@
 const { supabase } = require('../config/database');
 
-const POSTING_FEE = 50; // AED
+const POSTING_FEE = 10; // LooP
 const ADMIN_USER_ID = '34f2bf42-0481-46cc-9e81-33284d4f8fe3';
-const DOLLAR_TO_AED_RATE = 3.67; // 1 USD = 3.67 AED
+const RUPEE_TO_LOOP_RATE = 1; // 1 INR = 1 LooP
 
 // Get user wallet
 const getWallet = async (req, res) => {
@@ -16,10 +16,10 @@ const getWallet = async (req, res) => {
       .single();
 
     if (error && error.code === 'PGRST116') {
-      // Create wallet if doesn't exist with initial 1000 AED (mock money)
+      // Create wallet if doesn't exist with initial 1000 LooP (mock money)
       const { data: newWallet, error: createError } = await supabase
         .from('wallets')
-        .insert({ user_id: user.id, balance: 1000.00, currency: 'AED' })
+        .insert({ user_id: user.id, balance: 1000.00, currency: 'LooP' })
         .select()
         .single();
 
@@ -75,19 +75,19 @@ const addMoney = async (req, res) => {
   try {
     console.log('Add money request received:', req.body);
     const user = req.user;
-    const { dollars } = req.body;
+    const { rupees } = req.body;  // CHANGED: from 'dollars' to 'rupees'
 
     // Validate input
-    if (!dollars || isNaN(dollars) || dollars <= 0) {
+    if (!rupees || isNaN(rupees) || rupees <= 0) {
       return res.status(400).json({ 
         success: false, 
         message: 'Please enter a valid amount' 
       });
     }
 
-    // Convert dollars to AED
-    const aedAmount = parseFloat((dollars * DOLLAR_TO_AED_RATE).toFixed(2));
-    console.log(`Converting $${dollars} to AED ${aedAmount}`);
+    // Convert rupees to LooP (1:1 ratio)
+    const loopAmount = parseFloat((rupees * RUPEE_TO_LOOP_RATE).toFixed(2));
+    console.log(`Converting ₹${rupees} to LooP ${loopAmount}`);
 
     // Get user wallet
     const { data: wallet, error: walletError } = await supabase
@@ -107,7 +107,7 @@ const addMoney = async (req, res) => {
     console.log('Current wallet balance:', wallet.balance);
 
     // Update wallet balance
-    const newBalance = parseFloat(wallet.balance) + aedAmount;
+    const newBalance = parseFloat(wallet.balance) + loopAmount;
     console.log('New balance will be:', newBalance);
 
     const { error: updateError } = await supabase
@@ -128,9 +128,9 @@ const addMoney = async (req, res) => {
       .from('wallet_transactions')
       .insert({
         wallet_id: wallet.id,
-        amount: aedAmount,
+        amount: loopAmount,
         type: 'credit',
-        description: `Added $${dollars} (AED ${aedAmount})`,
+        description: `Added ₹${rupees} (LooP ${loopAmount})`,
         reference_type: 'top_up',
       });
 
@@ -141,10 +141,10 @@ const addMoney = async (req, res) => {
     console.log('Money added successfully');
     return res.status(200).json({ 
       success: true, 
-      message: `Successfully added AED ${aedAmount} to your wallet`,
+      message: `Successfully added LooP ${loopAmount} to your wallet`,
       newBalance,
-      dollarsAdded: dollars,
-      aedAdded: aedAmount
+      rupeesAdded: rupees,
+      loopAdded: loopAmount
     });
   } catch (error) {
     console.error('Error in addMoney:', error);
@@ -157,8 +157,9 @@ const getExchangeRate = async (req, res) => {
   try {
     return res.status(200).json({ 
       success: true, 
-      rate: DOLLAR_TO_AED_RATE,
-      currency: 'AED'
+      rate: RUPEE_TO_LOOP_RATE,
+      currency: 'LooP',
+      baseCurrency: 'INR'
     });
   } catch (error) {
     console.error('Error in getExchangeRate:', error);

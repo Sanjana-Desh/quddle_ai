@@ -101,8 +101,8 @@ class WalletService {
     }
   }
 
-  // Add money to wallet
-  static Future<Map<String, dynamic>> addMoney(double dollars) async {
+  // Add money to wallet - CHANGED: from dollars to rupees
+  static Future<Map<String, dynamic>> addMoney(double rupees) async {
     print("🔗 Adding money to: $_baseUrl/wallet/add-money");
     try {
       final token = await _getToken();
@@ -114,7 +114,7 @@ class WalletService {
 
       final url = Uri.parse('$_baseUrl/wallet/add-money');
       print("📡 POST $url");
-      print("💵 Amount: \$$dollars");
+      print("💵 Amount: ₹$rupees");
 
       final response = await http.post(
         url,
@@ -122,7 +122,7 @@ class WalletService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'dollars': dollars}),
+        body: jsonEncode({'rupees': rupees}),  // CHANGED: from 'dollars' to 'rupees'
       );
 
       print("📥 Response status: ${response.statusCode}");
@@ -163,7 +163,7 @@ class WalletService {
         return {
           'success': false,
           'message': 'Exchange rate endpoint not found',
-          'rate': 3.67 // Fallback rate
+          'rate': 1.0 // Fallback rate (1 INR = 1 LooP)
         };
       }
 
@@ -174,7 +174,7 @@ class WalletService {
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
-        'rate': 3.67 // Fallback rate
+        'rate': 1.0 // Fallback rate (1 INR = 1 LooP)
       };
     }
   }

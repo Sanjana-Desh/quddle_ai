@@ -164,7 +164,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: ClassifiedsColors.primary.withOpacity(0.1),
+                color: ClassifiedsColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: ClassifiedsColors.primary, size: 24),
@@ -308,7 +308,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
     }
 
     // In Loop currency: 1 Loop = ₹1
-    const postingFeeLoops = 50;
+    const postingFeeLoops = 10;
     
     if (_walletBalance == null || _walletBalance! < postingFeeLoops) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -400,8 +400,8 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _priceController,
-                label: 'Price (LooPs)',
-                hint: 'Enter price in LooPs',
+                label: 'Price',
+                hint: 'Enter price in ₹',
                 icon: Icons.currency_rupee,
                 keyboardType: TextInputType.number,
               ),
@@ -468,7 +468,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
                   Icon(
                     Icons.account_balance_wallet,
                     size: 16,
-                    color: ClassifiedsColors.loopCurrency,
+                    color: ClassifiedsColors.loopIcon,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -496,7 +496,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
           end: Alignment.bottomRight,
           colors: [
             ClassifiedsColors.loopBackground,
-            ClassifiedsColors.loopBackground.withOpacity(0.7),
+            ClassifiedsColors.loopBackground.withValues(alpha: 0.7),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -515,7 +515,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
             ),
             child: Icon(
               Icons.info_outline,
-              color: ClassifiedsColors.loopCurrency,
+              color: ClassifiedsColors.loopIcon,
               size: 24,
             ),
           ),
@@ -525,7 +525,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Posting Fee: 50 LooPs',
+                  'Posting Fee: 10 LooPs',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -578,7 +578,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: isSelected ? color.withOpacity(0.2) : ClassifiedsColors.cardBackground,
+                  color: isSelected ? color.withValues(alpha: 0.2) : ClassifiedsColors.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected ? color : ClassifiedsColors.border,
@@ -755,7 +755,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
                                   fit: StackFit.expand,
                                   children: [
                                     Container(
-                                      color: ClassifiedsColors.textPrimary.withOpacity(0.1),
+                                      color: ClassifiedsColors.textPrimary.withValues(alpha: 0.1),
                                       child: Icon(
                                         Icons.play_circle_outline,
                                         size: 40,
@@ -779,7 +779,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: ClassifiedsColors.textPrimary.withOpacity(0.7),
+                            color: ClassifiedsColors.textPrimary.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -846,7 +846,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ClassifiedsColors.primary.withOpacity(0.3),
+            color: ClassifiedsColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -871,7 +871,7 @@ class _PostClassifiedScreenState extends State<PostClassifiedScreen> {
                 ),
               )
             : Text(
-                'Post Ad (50 LooPs)',
+                'Post Ad (10 LooPs)',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
