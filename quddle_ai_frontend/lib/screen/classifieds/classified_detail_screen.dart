@@ -73,7 +73,7 @@ class ClassifiedDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'AED ${classified['price']}',
+                        'LooP ${classified['price']}',
                         style: const TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,

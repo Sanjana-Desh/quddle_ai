@@ -7,13 +7,14 @@ import 'auth_service.dart';
 class ClassifiedsService {
   static String get _baseUrl => AuthService.baseUrl;
 
-  // Post a classified ad
+  /// POST CLASSIFIED
   static Future<Map<String, dynamic>> postClassified({
     required String title,
     required String description,
     double? price,
     String? category,
     String? location,
+    required String phone,
     int imageCount = 0,
   }) async {
     try {
@@ -34,41 +35,38 @@ class ClassifiedsService {
           'price': price,
           'category': category,
           'location': location,
+          'phone': phone,
           'imageCount': imageCount,
         }),
       );
 
-      final data = jsonDecode(response.body);
-      return data;
+      return jsonDecode(response.body);
     } catch (e) {
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 
-  // Get all classifieds
+  /// GET ALL CLASSIFIEDS
   static Future<Map<String, dynamic>> getClassifieds({
     String? category,
     String status = 'active',
   }) async {
     try {
       var url = '$_baseUrl/classifieds?status=$status';
-      if (category != null) {
-        url += '&category=$category';
-      }
+      if (category != null) url += '&category=$category';
 
       final response = await http.get(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       );
 
-      final data = jsonDecode(response.body);
-      return data;
+      return jsonDecode(response.body);
     } catch (e) {
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 
-  // Get user's classifieds
+  /// GET USER'S CLASSIFIEDS
   static Future<Map<String, dynamic>> getMyClassifieds() async {
     try {
       final token = await SecureStorage.readToken();
@@ -84,47 +82,52 @@ class ClassifiedsService {
         },
       );
 
-      final data = jsonDecode(response.body);
-      return data;
+      return jsonDecode(response.body);
     } catch (e) {
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 
-  // Upload images and update classified
+  /// UPLOAD IMAGES + MEDIA TYPES
   static Future<bool> uploadImages({
     required String classifiedId,
     required List<File> images,
     required List<Map<String, dynamic>> uploadUrls,
+    required List<String> mediaTypes,   // <-- ADDED
   }) async {
     try {
       final token = await SecureStorage.readToken();
       if (token == null) return false;
 
-      // Upload images to S3
+      // 1. Upload each media file (image/video/gif)
       for (int i = 0; i < images.length && i < uploadUrls.length; i++) {
-        final imageBytes = await images[i].readAsBytes();
+        final bytes = await images[i].readAsBytes();
+
         await http.put(
           Uri.parse(uploadUrls[i]['uploadUrl']),
           headers: {'Content-Type': 'image/jpeg'},
-          body: imageBytes,
+          body: bytes,
         );
       }
 
-      // Update classified with image keys
+      // 2. Update Supabase with URLs + media types
       final imageKeys = uploadUrls.map((u) => u['key'] as String).toList();
+
       final response = await http.put(
         Uri.parse('$_baseUrl/classifieds/$classifiedId/images'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'imageKeys': imageKeys}),
+        body: jsonEncode({
+          'imageKeys': imageKeys,
+          'mediaTypes': mediaTypes,     // <-- FIXED
+        }),
       );
 
       return response.statusCode == 200;
     } catch (e) {
-      print('Error uploading images: $e');
+      print('Error uploading media: $e');
       return false;
     }
   }

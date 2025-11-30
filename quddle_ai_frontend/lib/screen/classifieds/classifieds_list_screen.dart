@@ -248,7 +248,7 @@ class _ClassifiedsListScreenState extends State<ClassifiedsListScreen> {
                     const SizedBox(height: 4),
                     if (classified['price'] != null)
                       Text(
-                        'AED ${classified['price']}',
+                        'LooP ${classified['price']}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

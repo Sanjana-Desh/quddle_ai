@@ -60,7 +60,7 @@ class _WalletScreenState extends State<WalletScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Exchange Rate: \$1 = AED $_exchangeRate',
+              'Exchange Rate: \₹1 = LooP $_exchangeRate',
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 16),
@@ -69,7 +69,7 @@ class _WalletScreenState extends State<WalletScreen> {
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
-                labelText: 'Amount in USD (\$)',
+                labelText: 'Amount in ₹ (\₹)',
                 labelStyle: const TextStyle(color: Colors.black),
                 hintText: 'Enter amount',
                 hintStyle: TextStyle(color: Colors.grey[600]),
@@ -98,7 +98,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 if (dollars != null && dollars > 0) {
                   final aed = dollars * _exchangeRate;
                   return Text(
-                    'You will receive: AED ${aed.toStringAsFixed(2)}',
+                    'You will receive: LooP ${aed.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -216,7 +216,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'AED ${_wallet?['balance']?.toStringAsFixed(2) ?? '0.00'}',
+                            'LooP ${_wallet?['balance']?.toStringAsFixed(2) ?? '0.00'}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 40,
@@ -225,7 +225,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _wallet?['currency'] ?? 'AED',
+                            _wallet?['currency'] ?? 'LooP',
                             style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 14,
@@ -267,7 +267,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Posting a classified ad costs AED 50.00',
+                                'Posting a classified ad costs LooP 10.00',
                                 style: TextStyle(fontSize: 14, color: Colors.black),
                               ),
                             ),
@@ -365,7 +365,7 @@ class _WalletScreenState extends State<WalletScreen> {
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
         trailing: Text(
-          '${isDebit ? '-' : '+'}AED ${amount.toStringAsFixed(2)}',
+          '${isDebit ? '-' : '+'}LooP ${amount.toStringAsFixed(2)}',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
